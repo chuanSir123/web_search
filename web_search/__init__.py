@@ -2,8 +2,8 @@ from typing import Dict, Any, List
 import asyncio
 from framework.plugin_manager.plugin import Plugin
 from framework.logger import get_logger
-from plugins.web_search.web_search.config import WebSearchConfig
-from plugins.web_search.web_search.web_searcher import WebSearcher
+from .config import WebSearchConfig
+from .web_searcher import WebSearcher
 from dataclasses import dataclass
 from framework.workflow.core.block import BlockRegistry
 from .blocks import WebSearchBlock
