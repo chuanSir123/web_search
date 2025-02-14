@@ -91,25 +91,4 @@ class AppendSystemPromptBlock(Block):
             messages[0].content = messages[0].content + f"{results}"
 
         return {"messages": messages}
-class GetRespFromLlmChatResponseBlock(Block):
-    """将搜索结果附加到系统提示的Block"""
-    name = "get_resp_from_llm_chat_response"
-
-    inputs = {
-        "llm_response": Input("llm_response", LLMChatResponse, "llm 回复")
-    }
-
-    outputs = {
-        "messages": Output("messages", List[LLMChatMessage], "更新后的消息列表")
-    }
-
-    def execute(self, **kwargs) -> Dict[str, Any]:
-        results = kwargs["results"]
-        messages: List[LLMChatMessage] = kwargs["messages"]
-
-        if messages and len(messages) > 0:
-            # 在第一条消息内容后面附加搜索结果
-            messages[0].content = messages[0].content + f"{results}"
-
-        return {"messages": messages}
 
