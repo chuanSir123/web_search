@@ -11,8 +11,8 @@ pip install chatgpt-mirai-qq-bot-web-search
 ## 使用
 
 在 chatgpt-mirai-qq-bot的web_ui中配置  
-使用示例请参考 [example/normal.yml](example/normal.yml)    
-工作流请参考 [示例图片](example/workflow.png)
+使用示例请参考 [web_search/example/normal.yml](web_search/example/roleplayWithWebSearch.yaml)    
+工作流请参考 [示例图片](web_search/example/workflow.png)
 
 ## 开源协议
 

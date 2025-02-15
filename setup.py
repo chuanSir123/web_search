@@ -2,12 +2,17 @@ from setuptools import setup, find_packages
 import io
 import os
 
-version = os.environ.get('RELEASE_VERSION', '0.1.1').lstrip('v')
+version = os.environ.get('RELEASE_VERSION', '0.1.9'
+'').lstrip('v')
 
 setup(
     name="chatgpt-mirai-qq-bot-web-search",
     version=version,
     packages=find_packages(),
+    include_package_data=True,  # 这行很重要
+    package_data={
+        "web_search": ["example/*.yaml", "example/*.yml"],
+    },
     install_requires=[
         "playwright","trafilatura","lxml_html_clean",
     ],

@@ -13,8 +13,9 @@ from framework.ioc.container import DependencyContainer
 from framework.workflow.core.workflow.builder import WorkflowBuilder
 from framework.workflow.core.workflow.registry import WorkflowRegistry
 logger = get_logger("WebSearch")
+import importlib.resources
 import os
-import os
+from pathlib import Path
 class WebSearchPlugin(Plugin):
     def __init__(self, block_registry: BlockRegistry , container: DependencyContainer):
         super().__init__()
@@ -35,23 +36,40 @@ class WebSearchPlugin(Plugin):
             self.block_registry.register("append_systemPrompt", "internal", AppendSystemPromptBlock)
         except Exception as e:
             logger.warning(f"WebSearchPlugin failed: {e}")
-        # 获取当前文件的绝对路径
-        current_file = os.path.abspath(__file__)
+        try:
+            # 获取当前文件的绝对路径
+            with importlib.resources.path('web_search', '__init__.py') as p:
+                package_path = p.parent
+                example_dir = package_path / 'example'
 
-        # 获取当前文件所在目录
-        current_dir = os.path.dirname(current_file)
+                # 确保目录存在
+                if not example_dir.exists():
+                    raise FileNotFoundError(f"Example directory not found at {example_dir}")
 
-        # 获取上级目录
-        parent_dir = os.path.dirname(current_dir)
+                # 获取所有yaml文件
+                yaml_files = list(example_dir.glob('*.yaml')) + list(example_dir.glob('*.yml'))
 
-        # 构建 example 目录的路径
-        example_dir = os.path.join(parent_dir, 'example')
-        # 获取 example 目录下所有的 yaml 文件
-        yaml_files = [f for f in os.listdir(example_dir) if f.endswith('.yaml') or f.endswith('.yml')]
+                for yaml in yaml_files:
+                    logger.info(yaml)
+                    self.workflow_registry.register("chat", yaml.stem, WorkflowBuilder.load_from_yaml(os.path.join(example_dir, yaml), self.container))
+        except Exception as e:
+            try:
+                current_file = os.path.abspath(__file__)
 
-        for yaml in yaml_files:
-            logger.info(os.path.join(example_dir, yaml))
-            self.workflow_registry.register("search", os.path.splitext(yaml)[0], WorkflowBuilder.load_from_yaml(os.path.join(example_dir, yaml), self.container))
+                # 获取当前文件所在目录
+                parent_dir = os.path.dirname(current_file)
+
+                # 构建 example 目录的路径
+                example_dir = os.path.join(parent_dir, 'example')
+                # 获取 example 目录下所有的 yaml 文件
+                yaml_files = [f for f in os.listdir(example_dir) if f.endswith('.yaml') or f.endswith('.yml')]
+
+                for yaml in yaml_files:
+                    logger.info(os.path.join(example_dir, yaml))
+                    self.workflow_registry.register("search", "roleplayWithWebSearch", WorkflowBuilder.load_from_yaml(os.path.join(example_dir, yaml), self.container))
+            except Exception as e:
+                logger.warning(f"workflow_registry failed: {e}")
+
         @dataclass
         class WebSearchEvent:
             """Web搜索事件"""
