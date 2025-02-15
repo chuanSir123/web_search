@@ -12,11 +12,11 @@ class WebSearchBlock(Block):
     name = "web_search"
 
     inputs = {
-        "llm_resp": Input("llm_resp", LLMChatResponse, "搜索关键词")
+        "llm_resp": Input(name="llm_resp",label="LLM 响应", data_type=LLMChatResponse, description="搜索关键词")
     }
 
     outputs = {
-        "results": Output("results", str, "搜索结果")
+        "results": Output(name="results",label="搜索结果",data_type= str, description="搜索结果")
     }
 
     def __init__(self, name: str = None, max_results: Optional[int] = None, timeout: Optional[int] = None, fetch_content: Optional[bool] = None):
@@ -74,12 +74,12 @@ class AppendSystemPromptBlock(Block):
     name = "append_system_prompt"
 
     inputs = {
-        "results": Input("results", str, "搜索结果"),
-        "messages": Input("messages", List[LLMChatMessage], "消息列表")
+        "results": Input(name="results",label="工具结果", data_type=str, description ="搜索结果"),
+        "messages": Input(name="messages",label="LLM 响应", data_type=List[LLMChatMessage],description = "消息列表")
     }
 
     outputs = {
-        "messages": Output("messages", List[LLMChatMessage], "更新后的消息列表")
+        "messages": Output(name="messages", label="拼装后的 llm 响应",data_type=List[LLMChatMessage], description = "更新后的消息列表")
     }
 
     def execute(self, **kwargs) -> Dict[str, Any]:
