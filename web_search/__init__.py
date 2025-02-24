@@ -1,17 +1,17 @@
 from typing import Dict, Any, List
 import asyncio
-from framework.plugin_manager.plugin import Plugin
-from framework.logger import get_logger
+from kirara_ai.plugin_manager.plugin import Plugin
+from kirara_ai.logger import get_logger
 from .config import WebSearchConfig
 from .web_searcher import WebSearcher
 from dataclasses import dataclass
-from framework.workflow.core.block import BlockRegistry
+from kirara_ai.workflow.core.block import BlockRegistry
 from .blocks import WebSearchBlock
 from .blocks import AppendSystemPromptBlock
-from framework.ioc.inject import Inject
-from framework.ioc.container import DependencyContainer
-from framework.workflow.core.workflow.builder import WorkflowBuilder
-from framework.workflow.core.workflow.registry import WorkflowRegistry
+from kirara_ai.ioc.inject import Inject
+from kirara_ai.ioc.container import DependencyContainer
+from kirara_ai.workflow.core.workflow.builder import WorkflowBuilder
+from kirara_ai.workflow.core.workflow.registry import WorkflowRegistry
 logger = get_logger("WebSearch")
 import importlib.resources
 import os
