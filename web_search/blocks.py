@@ -1,11 +1,11 @@
 from typing import Any, Dict, List, Optional
 import asyncio
-from framework.workflow.core.block import Block
-from framework.workflow.core.block.input_output import Input, Output
+from kirara_ai.workflow.core.block import Block
+from kirara_ai.workflow.core.block.input_output import Input, Output
 from .web_searcher import WebSearcher
 from .config import WebSearchConfig
-from framework.llm.format.message import LLMChatMessage
-from framework.llm.format.response import LLMChatResponse
+from kirara_ai.llm.format.message import LLMChatMessage
+from kirara_ai.llm.format.response import LLMChatResponse
 
 class WebSearchBlock(Block):
     """Web搜索Block"""
