@@ -158,7 +158,8 @@ class WebSearcher:
             for attempt in range(max_retries):
                 try:
                     logger.info(f"Attempting to load search page (attempt {attempt + 1}/{max_retries})")
-                    search_url = self.config.custom_search_engine_url or f"https://www.bing.com/search?q={encoded_query}"
+                    base_url = self.config.custom_search_engine_url or "https://www.bing.com/search?q="
+                    search_url = f"{base_url}encoded_query"
                     await page.goto(
                         search_url,
                         wait_until='domcontentloaded',
