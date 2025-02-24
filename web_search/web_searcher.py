@@ -7,19 +7,21 @@ import asyncio
 import subprocess
 import sys
 from kirara_ai.logger import get_logger
+from .config import WebSearchConfig
 
 logger = get_logger("WebSearchPlugin")
 
 class WebSearcher:
-    def __init__(self):
+    def __init__(self, config: WebSearchConfig):
         self.playwright = None
         self.browser = None
         self.context = None
+        self.config = config
 
     @classmethod
-    async def create(cls):
+    async def create(cls, config: WebSearchConfig):
         """创建 WebSearcher 实例的工厂方法"""
-        self = cls()
+        self = cls(config)
         return self
 
     async def _ensure_initialized(self):
@@ -156,8 +158,9 @@ class WebSearcher:
             for attempt in range(max_retries):
                 try:
                     logger.info(f"Attempting to load search page (attempt {attempt + 1}/{max_retries})")
+                    search_url = self.config.custom_search_engine_url or f"https://www.bing.com/search?q={encoded_query}"
                     await page.goto(
-                        f"https://www.bing.com/search?q={encoded_query}",
+                        search_url,
                         wait_until='domcontentloaded',
                         timeout=timeout * 1000
                     )
