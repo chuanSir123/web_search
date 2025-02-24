@@ -9,3 +9,4 @@ class WebSearchConfig:
     fetch_content: bool = True  # 是否获取详细内容
     min_sleep: float = 1.0  # 最小随机等待时间
     max_sleep: float = 3.0  # 最大随机等待时间 
+    custom_search_engine_url: Optional[str] = None  # 自定义搜索引擎地址
