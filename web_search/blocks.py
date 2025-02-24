@@ -12,20 +12,22 @@ class WebSearchBlock(Block):
     name = "web_search"
 
     inputs = {
-        "llm_resp": Input(name="llm_resp",label="LLM 响应", data_type=LLMChatResponse, description="搜索关键词")
+        "llm_resp": Input(name="llm_resp",label="LLM 响应", data_type=LLMChatResponse, description="搜索关键词"),
+        "search_url": Input(name="search_url", label="搜索 URL", data_type=Optional[str], description="自定义搜索引擎地址")
     }
 
     outputs = {
         "results": Output(name="results",label="搜索结果",data_type= str, description="搜索结果")
     }
 
-    def __init__(self, name: str = None, max_results: Optional[int] = None, timeout: Optional[int] = None, fetch_content: Optional[bool] = None):
+    def __init__(self, name: str = None, max_results: Optional[int] = None, timeout: Optional[int] = None, fetch_content: Optional[bool] = None, search_url: Optional[str] = None):
         super().__init__(name)
         self.searcher = None
         self.config = WebSearchConfig()
         self.max_results = max_results
         self.timeout = timeout
         self.fetch_content = fetch_content
+        self.search_url = search_url
 
     def _ensure_searcher(self):
         """同步方式初始化searcher"""
@@ -40,6 +42,7 @@ class WebSearchBlock(Block):
 
     def execute(self, **kwargs) -> Dict[str, Any]:
         llmResponse = kwargs["llm_resp"]
+        search_url = kwargs.get("search_url", self.search_url)
 
         query = llmResponse.choices[0].message.content if llmResponse.choices else ""
         if query == "" or query.startswith("无"):
@@ -62,7 +65,8 @@ class WebSearchBlock(Block):
                     query=query,
                     max_results=max_results,
                     timeout=timeout,
-                    fetch_content=fetch_content
+                    fetch_content=fetch_content,
+                    search_url=search_url
                 )
             )
             return {"results": "\n以下是联网搜索的结果:\n-- 搜索结果开始 --"+results+"\n-- 搜索结果结束 --"}

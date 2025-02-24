@@ -143,7 +143,7 @@ class WebSearcher:
             logger.error(f"Failed to process result {idx}: {e}")
             return None
 
-    async def search(self, query: str, max_results: int = 3, timeout: int = 10, fetch_content: bool = True) -> str:
+    async def search(self, query: str, max_results: int = 3, timeout: int = 10, fetch_content: bool = True, search_url: Optional[str] = None) -> str:
         """执行搜索"""
         context = await self._ensure_initialized()
 
@@ -158,7 +158,7 @@ class WebSearcher:
             for attempt in range(max_retries):
                 try:
                     logger.info(f"Attempting to load search page (attempt {attempt + 1}/{max_retries})")
-                    base_url = self.config.custom_search_engine_url or "https://www.bing.com/search?q="
+                    base_url = search_url or self.config.custom_search_engine_url or "https://www.bing.com/search?q="
                     search_url = f"{base_url}encoded_query"
                     await page.goto(
                         search_url,
