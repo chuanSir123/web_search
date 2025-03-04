@@ -6,7 +6,7 @@ from .config import WebSearchConfig
 from .web_searcher import WebSearcher
 from dataclasses import dataclass
 from kirara_ai.workflow.core.block import BlockRegistry
-from .blocks import WebSearchBlock
+from .blocks import WebSearchBlock,WebSearchByKeywordBlock
 from .blocks import AppendSystemPromptBlock
 from kirara_ai.ioc.inject import Inject
 from kirara_ai.ioc.container import DependencyContainer
@@ -30,6 +30,7 @@ class WebSearchPlugin(Plugin):
         # 注册Block
         try:
             self.block_registry.register("web_search", "search", WebSearchBlock)
+            self.block_registry.register("web_search_by_keyword", "search", WebSearchByKeywordBlock)
         except Exception as e:
             logger.warning(f"WebSearchPlugin failed: {e}")
         try:
