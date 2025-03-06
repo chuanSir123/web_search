@@ -1,4 +1,4 @@
-# OneBot-adapter for ChatGPT-Mirai-QQ-Bot
+# web_search for ChatGPT-Mirai-QQ-Bot
 
 本项目是 [ChatGPT-Mirai-QQ-Bot](https://github.com/lss233/chatgpt-mirai-qq-bot) 的一个插件，用于将OneBot协议的消息转换为ChatGPT-Mirai-QQ-Bot的消息格式。
 
