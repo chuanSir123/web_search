@@ -162,7 +162,7 @@ class AppendSystemPromptBlock(Block):
         results = kwargs["results"]
         messages: List[LLMChatMessage] = kwargs["messages"]
 
-        if messages and len(messages) > 0:
+        if messages and len(messages) > 0 and results and isinstance(messages[0].content,str):
             # 在第一条消息内容后面附加搜索结果
             messages[0].content = messages[0].content + f"{results}"
 

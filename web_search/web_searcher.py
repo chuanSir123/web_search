@@ -268,10 +268,12 @@ class WebSearcher:
             if engine == 'google':
                 await self.simulate_human_scroll(page)
 
+            timeout = 5000
             for selector in engine_config['selectors']:
                 try:
                     logger.info(f"Trying selector: {selector}")
-                    await page.wait_for_selector(selector, timeout=8000)  # 增加等待时间
+                    await page.wait_for_selector(selector, timeout=timeout)  # 增加等待时间
+                    timeout = 500
                     results = await page.query_selector_all(selector)
                     if results and len(results) > 0:
                         logger.info(f"Found {len(results)} results with selector {selector}")
@@ -281,28 +283,36 @@ class WebSearcher:
                     continue
 
             if not results:
-                # 尝试直接使用 JavaScript 获取元素
-                if engine == 'google':
-                    try:
-                        # 使用更通用的JavaScript选择器尝试获取结果
-                        results = await page.evaluate("""
-                            () => {
-                                const elements = document.querySelectorAll('div[data-sokoban-container], div.g, .MjjYud');
-                                return Array.from(elements).length;
-                            }
-                        """)
-                        logger.info(f"JavaScript found {results} elements")
+                # 添加重试机制
+                retry_count = 0
+                while not results and retry_count < max_results:
+                    logger.info(f"Retrying search, attempt {retry_count + 1}/{max_results}")
+                    # 刷新页面重试
+                    await page.reload(wait_until='load', timeout=timeout * 1000)
+                    await self.simulate_human_scroll(page)
 
-                        # 如果找到了元素，使用evaluate来处理它们
-                        if results > 0:
-                            # 自定义处理逻辑...
-                            pass
-                    except Exception as e:
-                        logger.error(f"JavaScript evaluation failed: {e}")
+                    # 重新尝试所有选择器
+                    timeout = 5000
+                    for selector in engine_config['selectors']:
+                        try:
+                            logger.info(f"Retrying selector: {selector}")
+                            await page.wait_for_selector(selector, timeout=timeout)
+                            timeout = 500
+                            results = await page.query_selector_all(selector)
+                            if results and len(results) > 0:
+                                logger.info(f"Found {len(results)} results with selector {selector} on retry {retry_count + 1}")
+                                break
+                        except Exception as e:
+                            logger.warning(f"Selector {selector} failed on retry {retry_count + 1}: {e}")
+                            continue
 
-                logger.error("No search results found with any selector")
-                await page.screenshot(path=f'search_failed_{engine}.png')
-                return "搜索结果加载失败"
+                    retry_count += 1
+
+
+                # 如果所有重试都失败了，才返回错误
+                if not results:
+                    logger.error("No search results found after all retries")
+                    return "搜索结果加载失败"
 
             logger.info(f"Found {len(results)} search results")
 
