@@ -31,7 +31,7 @@ class WebSearcher:
         self.video_ids = self._load_video_ids()
         self.search_engines = {
             'bing': {
-                'url': 'https://www.bing.com/search?q={}',
+                'url': 'https://cn.bing.com/search?q={}',
                 'selectors': ['.b_algo', '#b_results .b_algo', 'main .b_algo'],
                 'title_selector': 'h2',
                 'link_selector': 'h2 a',
@@ -268,17 +268,18 @@ class WebSearcher:
             if engine == 'google':
                 await self.simulate_human_scroll(page)
 
-            timeout = 5000
+            selector_timeout = 5000
             for selector in engine_config['selectors']:
                 try:
                     logger.info(f"Trying selector: {selector}")
-                    await page.wait_for_selector(selector, timeout=timeout)  # 增加等待时间
-                    timeout = 500
+                    await page.wait_for_selector(selector, timeout=selector_timeout)  # 增加等待时间
+                    selector_timeout = 500
                     results = await page.query_selector_all(selector)
                     if results and len(results) > 0:
                         logger.info(f"Found {len(results)} results with selector {selector}")
                         break
                 except Exception as e:
+                    selector_timeout = 500
                     logger.warning(f"Selector {selector} failed: {e}")
                     continue
 
@@ -288,21 +289,26 @@ class WebSearcher:
                 while not results and retry_count < max_results:
                     logger.info(f"Retrying search, attempt {retry_count + 1}/{max_results}")
                     # 刷新页面重试
-                    await page.reload(wait_until='load', timeout=timeout * 1000)
+                    await page.goto(
+                                engine_config['url'].format(encoded_query),
+                                wait_until='load',
+                                timeout=timeout * 1000
+                            )
                     await self.simulate_human_scroll(page)
 
                     # 重新尝试所有选择器
-                    timeout = 5000
+                    selector_timeout = 5000
                     for selector in engine_config['selectors']:
                         try:
                             logger.info(f"Retrying selector: {selector}")
-                            await page.wait_for_selector(selector, timeout=timeout)
-                            timeout = 500
+                            await page.wait_for_selector(selector, timeout=selector_timeout)
+                            selector_timeout = 500
                             results = await page.query_selector_all(selector)
                             if results and len(results) > 0:
                                 logger.info(f"Found {len(results)} results with selector {selector} on retry {retry_count + 1}")
                                 break
                         except Exception as e:
+                            selector_timeout = 500
                             logger.warning(f"Selector {selector} failed on retry {retry_count + 1}: {e}")
                             continue
 
@@ -336,9 +342,10 @@ class WebSearcher:
             logger.error(f"Search failed - Query: {query} - Error: {e}", exc_info=True)
             return f"搜索失败: {str(e)}"
         finally:
-            if page:
+            if context:
                 try:
-                    await page.close()
+                    logger.debug("context.close")
+                    await context.close()
                 except Exception as e:
                     logger.error(f"Error closing page: {e}")
 
@@ -483,8 +490,8 @@ class WebSearcher:
             logger.error(f"抖音视频搜索失败 - 关键词: {keyword} - 错误: {e}", exc_info=True)
             return f"搜索失败: {str(e)}"
         finally:
-            if page:
+            if context:
                 try:
-                    await page.close()
+                    await context.close()
                 except Exception as e:
                     logger.error(f"关闭页面错误: {e}")

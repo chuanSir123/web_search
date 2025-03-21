@@ -1,6 +1,9 @@
 from typing import Dict, Any, List
 import asyncio
 from kirara_ai.plugin_manager.plugin import Plugin
+import subprocess
+import sys
+import sys
 from kirara_ai.logger import get_logger
 from .config import WebSearchConfig
 from .web_searcher import WebSearcher
@@ -27,6 +30,32 @@ class WebSearchPlugin(Plugin):
     def on_load(self):
         logger.info("WebSearchPlugin loading")
 
+        try:
+            # 运行检查命令
+            result = subprocess.run(['playwright', 'install', 'chromium', '--dry-run'],
+                                  capture_output=True,
+                                  text=True)
+            # 如果命令执行成功且输出中包含已安装的信息
+            if "is already installed" not in result.stdout:
+                logger.info("Installing playwright browsers...")
+                process = subprocess.Popen(
+                    [sys.executable, "-m", "playwright", "install", "chromium"],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE
+                )
+                stdout, stderr = process.communicate()
+                if process.returncode != 0:
+                    raise RuntimeError(f"Failed to install playwright browsers: {stderr.stderr}")
+        except Exception as e:
+            logger.info("Installing playwright browsers...")
+            process = subprocess.Popen(
+                [sys.executable, "-m", "playwright", "install", "chromium"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
+            stdout, stderr = process.communicate()
+            if process.returncode != 0:
+                raise RuntimeError(f"Failed to install playwright browsers: {stderr.stderr}")
         # 注册Block
         try:
             self.block_registry.register("web_search", "search", WebSearchBlock)
