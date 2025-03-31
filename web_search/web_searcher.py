@@ -31,8 +31,8 @@ class WebSearcher:
         self.video_ids = self._load_video_ids()
         self.search_engines = {
             'bing': {
-                'url': 'https://cn.bing.com/search?q={}',
-                'selectors': ['.b_algo', '#b_results .b_algo', 'main .b_algo'],
+                'url': 'https://www.bing.com/search?q={}',
+                'selectors': ['.b_algo'],
                 'title_selector': 'h2',
                 'link_selector': 'h2 a',
                 'snippet_selector': '.b_caption p'
@@ -62,10 +62,8 @@ class WebSearcher:
     async def _ensure_initialized(self,proxy):
         """确保浏览器已初始化"""
         try:
-            if self.context:
-                return self.context
-            self.playwright = await async_playwright().start()
 
+            self.playwright = await async_playwright().start()
             # 创建用户数据目录路径
             user_data_dir = os.path.join(os.path.expanduser("~"), ".playwright_user_data")+f'{random.randint(1, 1000000)}'
             os.makedirs(user_data_dir, exist_ok=True)
@@ -106,7 +104,6 @@ class WebSearcher:
                     user_data_dir=user_data_dir,
                     **context_options
                 )
-
                 self.browser = None  # 不再需要单独的browser引用
 
             except Exception as e:
@@ -148,7 +145,6 @@ class WebSearcher:
 
         except Exception as e:
             logger.error(f"Failed to initialize WebSearcher: {e}")
-            await self.close()
             raise
 
     async def simulate_human_scroll(self, page):
@@ -260,7 +256,6 @@ class WebSearcher:
                                 wait_until='load',
                                 timeout=timeout * 1000
                             )
-
             # 使用搜索引擎特定的选择器
             results = None
 
@@ -268,7 +263,7 @@ class WebSearcher:
             if engine == 'google':
                 await self.simulate_human_scroll(page)
 
-            selector_timeout = 5000
+            selector_timeout = timeout * 1000
             for selector in engine_config['selectors']:
                 try:
                     logger.info(f"Trying selector: {selector}")
@@ -297,7 +292,7 @@ class WebSearcher:
                     await self.simulate_human_scroll(page)
 
                     # 重新尝试所有选择器
-                    selector_timeout = 5000
+                    selector_timeout = timeout * 1000
                     for selector in engine_config['selectors']:
                         try:
                             logger.info(f"Retrying selector: {selector}")
@@ -342,12 +337,8 @@ class WebSearcher:
             logger.error(f"Search failed - Query: {query} - Error: {e}", exc_info=True)
             return f"搜索失败: {str(e)}"
         finally:
-            if context:
-                try:
-                    logger.debug("context.close")
-                    await context.close()
-                except Exception as e:
-                    logger.error(f"Error closing page: {e}")
+            await self.close()
+
 
     async def close(self):
         """关闭浏览器"""
@@ -490,8 +481,4 @@ class WebSearcher:
             logger.error(f"抖音视频搜索失败 - 关键词: {keyword} - 错误: {e}", exc_info=True)
             return f"搜索失败: {str(e)}"
         finally:
-            if context:
-                try:
-                    await context.close()
-                except Exception as e:
-                    logger.error(f"关闭页面错误: {e}")
+            await self.close()

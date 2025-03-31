@@ -23,7 +23,7 @@ class WebSearchBlock(Block):
     }
 
     def __init__(self, name: str = None, max_results: Optional[int] = 3, timeout: Optional[int] = 10, fetch_content: Optional[bool] = True
-    ,engine: Annotated[Optional[str],ParamMeta(label="搜索引擎", description="要使用的搜索引擎", options_provider=get_options_provider),] = "bing", proxy: str = None,):
+    ,engine: Annotated[Optional[str],ParamMeta(label="搜索引擎", description="要使用的搜索引擎", options_provider=get_options_provider),] = "baidu", proxy: str = None,):
         super().__init__(name)
         self.searcher = None
         self.config = WebSearchConfig()
@@ -47,7 +47,7 @@ class WebSearchBlock(Block):
     def execute(self, **kwargs) -> Dict[str, Any]:
         llmResponse = kwargs["llm_resp"]
 
-        query = llmResponse.choices[0].message.content if llmResponse.choices else ""
+        query = llmResponse.message.content[0].text if llmResponse.message.content[0].text else ""
         if query == "" or query.startswith("无"):
             return {"results": ""}
         max_results = self.max_results
@@ -91,7 +91,7 @@ class WebSearchByKeywordBlock(Block):
     }
 
     def __init__(self, name: str = None, max_results: Optional[int] = 3, timeout: Optional[int] = 10, fetch_content: Optional[bool] = True
-    ,engine: Annotated[Optional[str],ParamMeta(label="搜索引擎", description="要使用的搜索引擎", options_provider=get_options_provider),] = "bing", proxy: str = None,):
+    ,engine: Annotated[Optional[str],ParamMeta(label="搜索引擎", description="要使用的搜索引擎", options_provider=get_options_provider),] = "baidu", proxy: str = None,):
         super().__init__(name)
         self.searcher = None
         self.config = WebSearchConfig()

@@ -45,7 +45,8 @@ class WebSearchPlugin(Plugin):
                 )
                 stdout, stderr = process.communicate()
                 if process.returncode != 0:
-                    raise RuntimeError(f"Failed to install playwright browsers: {stderr.stderr}")
+                    logger.error(f"Failed to install playwright browsers: {stderr}")
+                    raise RuntimeError(f"Failed to install playwright browsers: {stderr}")
         except Exception as e:
             logger.info("Installing playwright browsers...")
             process = subprocess.Popen(
@@ -55,7 +56,8 @@ class WebSearchPlugin(Plugin):
             )
             stdout, stderr = process.communicate()
             if process.returncode != 0:
-                raise RuntimeError(f"Failed to install playwright browsers: {stderr.stderr}")
+                logger.error(f"Failed to install playwright browsers: {stderr}")
+                raise RuntimeError(f"Failed to install playwright browsers: {stderr}")
         # 注册Block
         try:
             self.block_registry.register("web_search", "search", WebSearchBlock)
