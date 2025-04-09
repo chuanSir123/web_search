@@ -3,7 +3,7 @@ import asyncio
 from kirara_ai.workflow.core.block import Block, Input, Output, ParamMeta
 from .web_searcher import WebSearcher
 from .config import WebSearchConfig
-from kirara_ai.llm.format.message import LLMChatMessage
+from kirara_ai.llm.format.message import LLMChatMessage,LLMChatTextContent
 from kirara_ai.llm.format.response import LLMChatResponse
 from kirara_ai.ioc.container import DependencyContainer
 import re
@@ -161,11 +161,8 @@ class AppendSystemPromptBlock(Block):
     def execute(self, **kwargs) -> Dict[str, Any]:
         results = kwargs["results"]
         messages: List[LLMChatMessage] = kwargs["messages"]
-
-        if messages and len(messages) > 0 and results and isinstance(messages[0].content,str):
-            # 在第一条消息内容后面附加搜索结果
-            messages[0].content = messages[0].content + f"{results}"
-
+        if messages and len(messages) > 0 and results:
+            messages.insert(-2,LLMChatMessage(role = "user",content=[LLMChatTextContent(text=results)]))
         return {"messages": messages}
 
 class DouyinVideoSearchBlock(Block):
